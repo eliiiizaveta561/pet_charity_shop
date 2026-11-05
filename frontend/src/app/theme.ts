@@ -22,6 +22,8 @@ const theme = createTheme({
     MuiButton: { defaultProps: { disableElevation: true } },
     MuiCard: { defaultProps: { variant: 'outlined' } },
     MuiPaper: { defaultProps: { variant: 'outlined' } },
+    // Отступы через gap: иначе Stack сбрасывает отрицательные поля вложенного Grid и сетка съезжает вправо.
+    MuiStack: { defaultProps: { useFlexGap: true } },
   },
 });
 
