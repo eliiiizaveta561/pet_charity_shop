@@ -4,6 +4,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import { CartItem, useCart } from '@/entities/cart';
 import { ProductImage } from '@/entities/product';
 import { formatPrice } from '@/shared/lib/format';
+import { useNotify } from '@/shared/ui/notifications';
 import QuantityStepper from '@/shared/ui/QuantityStepper';
 
 interface CartItemRowProps {
@@ -11,8 +12,18 @@ interface CartItemRowProps {
 }
 
 export default function CartItemRow({ item }: CartItemRowProps) {
-  const { setQty, removeItem } = useCart();
+  const { addItem, setQty, removeItem } = useCart();
+  const notify = useNotify();
   const { product, qty } = item;
+
+  const handleRemove = () => {
+    removeItem(product.id);
+    notify({
+      message: `«${product.name}» удалён из корзины`,
+      actionLabel: 'Вернуть',
+      onAction: () => addItem(product, qty),
+    });
+  };
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -34,7 +45,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
         <Typography sx={{ minWidth: 80, textAlign: 'right', fontWeight: 700, display: { xs: 'none', sm: 'block' } }}>
           {formatPrice(product.price * qty)}
         </Typography>
-        <IconButton aria-label="Удалить товар" onClick={() => removeItem(product.id)}>
+        <IconButton aria-label="Удалить товар" onClick={handleRemove}>
           <DeleteIcon />
         </IconButton>
       </Stack>

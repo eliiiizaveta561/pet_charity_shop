@@ -1,17 +1,20 @@
 import { useState } from 'react';
-import { Link as RouterLink, useParams } from 'react-router-dom';
-import { Box, Breadcrumbs, Button, Chip, Grid, Link, Paper, Snackbar, Stack, Typography } from '@mui/material';
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
+import { Box, Breadcrumbs, Button, Chip, Grid, Link, Paper, Stack, Typography } from '@mui/material';
 import { categoryLabels, ProductImage, products } from '@/entities/product';
 import AddToCartButton from '@/features/add-to-cart/AddToCartButton';
 import { formatPrice } from '@/shared/lib/format';
 import MessageScreen from '@/shared/ui/MessageScreen';
+import { useNotify } from '@/shared/ui/notifications';
 import QuantityStepper from '@/shared/ui/QuantityStepper';
+import ProductReviews from './ProductReviews';
 
 export default function ProductPage() {
   const { id } = useParams();
   const product = products.find((p) => p.id === Number(id));
+  const navigate = useNavigate();
+  const notify = useNotify();
   const [qty, setQty] = useState(1);
-  const [notice, setNotice] = useState(false);
 
   if (!product) {
     return (
@@ -23,6 +26,13 @@ export default function ProductPage() {
       />
     );
   }
+
+  const handleAdded = () =>
+    notify({
+      message: 'Товар добавлен в корзину',
+      actionLabel: 'Открыть корзину',
+      onAction: () => navigate('/cart'),
+    });
 
   return (
     <Stack spacing={3}>
@@ -49,13 +59,7 @@ export default function ProductPage() {
 
             <Stack direction="row" spacing={2} alignItems="center">
               <QuantityStepper value={qty} onChange={setQty} />
-              <AddToCartButton
-                product={product}
-                qty={qty}
-                size="large"
-                label="Добавить в корзину"
-                onAdded={() => setNotice(true)}
-              />
+              <AddToCartButton product={product} qty={qty} size="large" label="Добавить в корзину" onAdded={handleAdded} />
             </Stack>
 
             <Paper sx={{ p: 2, bgcolor: 'rgba(233,162,59,0.12)' }}>
@@ -70,17 +74,7 @@ export default function ProductPage() {
         </Grid>
       </Grid>
 
-      <Snackbar
-        open={notice}
-        autoHideDuration={2500}
-        onClose={() => setNotice(false)}
-        message="Товар добавлен в корзину"
-        action={
-          <Button color="secondary" size="small" component={RouterLink} to="/cart">
-            Открыть корзину
-          </Button>
-        }
-      />
+      <ProductReviews productId={product.id} />
     </Stack>
   );
 }

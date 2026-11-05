@@ -25,9 +25,14 @@ export default function CharityPicker({ charities }: CharityPickerProps) {
         <Alert
           severity="success"
           action={
-            <Button color="inherit" size="small" component={RouterLink} to={count > 0 ? '/cart' : '/catalog'}>
-              {count > 0 ? 'Вернуться в корзину' : 'Выбрать товары'}
-            </Button>
+            <>
+              <Button color="inherit" size="small" onClick={() => setCharity(null)}>
+                Снять выбор
+              </Button>
+              <Button color="inherit" size="small" component={RouterLink} to={count > 0 ? '/cart' : '/catalog'}>
+                {count > 0 ? 'Вернуться в корзину' : 'Выбрать товары'}
+              </Button>
+            </>
           }
         >
           Выбрано: {selected.name}, {selected.city}

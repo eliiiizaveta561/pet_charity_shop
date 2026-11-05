@@ -1,8 +1,9 @@
-import { Box, Grid, Stack, Typography } from '@mui/material';
+import { Button, Grid, Stack, Typography } from '@mui/material';
 import { ProductCard, products } from '@/entities/product';
 import AddToCartButton from '@/features/add-to-cart/AddToCartButton';
 import ProductFilters from '@/features/filter-products/ProductFilters';
 import { useProductFilters } from '@/features/filter-products/useProductFilters';
+import EmptyState from '@/shared/ui/EmptyState';
 
 export default function CatalogPage() {
   const filters = useProductFilters(products);
@@ -13,10 +14,15 @@ export default function CatalogPage() {
       <ProductFilters filters={filters} />
 
       {filters.visible.length === 0 ? (
-        <Box sx={{ py: 6, textAlign: 'center' }}>
-          <Typography variant="h6">Ничего не найдено</Typography>
-          <Typography color="text.secondary">Измените запрос или выберите другую категорию.</Typography>
-        </Box>
+        <EmptyState
+          title="Ничего не найдено"
+          text="Измените запрос или выберите другую категорию."
+          action={
+            <Button variant="outlined" onClick={filters.reset}>
+              Сбросить фильтры
+            </Button>
+          }
+        />
       ) : (
         <Grid container spacing={3}>
           {filters.visible.map((product) => (

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { CartProvider } from '@/entities/cart';
+import { NotificationProvider } from '@/shared/ui/notifications';
 import theme from '../theme';
 
 interface AppProvidersProps {
@@ -13,7 +14,9 @@ export default function AppProviders({ children }: AppProvidersProps) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <CartProvider>{children}</CartProvider>
+        <NotificationProvider>
+          <CartProvider>{children}</CartProvider>
+        </NotificationProvider>
       </BrowserRouter>
     </ThemeProvider>
   );

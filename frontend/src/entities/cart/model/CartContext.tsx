@@ -1,6 +1,7 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import type { Product } from '@/entities/product';
 import type { Charity } from '@/entities/charity';
+import { loadJson, saveJson } from '@/shared/lib/storage';
 
 export interface CartItem {
   product: Product;
@@ -24,10 +25,30 @@ interface CartState {
 
 const CartContext = createContext<CartState | null>(null);
 
+const STORAGE_KEY = 'dobromarket-cart';
+
+type StoredCart = Pick<CartState, 'items' | 'charity' | 'donation'>;
+
+const isStoredCart = (value: unknown): value is StoredCart => {
+  const cart = value as StoredCart | null;
+  return (
+    typeof cart === 'object' &&
+    cart !== null &&
+    Array.isArray(cart.items) &&
+    cart.items.every((item) => typeof item.qty === 'number' && typeof item.product?.price === 'number') &&
+    typeof cart.donation === 'number'
+  );
+};
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [charity, setCharity] = useState<Charity | null>(null);
-  const [donation, setDonationValue] = useState<number>(0);
+  const [stored] = useState(() => loadJson(STORAGE_KEY, isStoredCart));
+  const [items, setItems] = useState<CartItem[]>(stored?.items ?? []);
+  const [charity, setCharity] = useState<Charity | null>(stored?.charity ?? null);
+  const [donation, setDonationValue] = useState<number>(stored?.donation ?? 0);
+
+  useEffect(() => {
+    saveJson(STORAGE_KEY, { items, charity, donation });
+  }, [items, charity, donation]);
 
   const value = useMemo<CartState>(() => {
     const count = items.reduce((sum, item) => sum + item.qty, 0);
