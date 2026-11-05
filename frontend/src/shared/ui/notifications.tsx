@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
-import { Button, Snackbar } from '@mui/material';
+import { Button, Slide, Snackbar } from '@mui/material';
 
 export interface Notification {
   message: string;
@@ -35,6 +35,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       <Snackbar
         key={current?.key}
         open={open}
+        TransitionComponent={Slide}
         autoHideDuration={4000}
         onClose={(_, reason) => reason !== 'clickaway' && setOpen(false)}
         message={current?.message}

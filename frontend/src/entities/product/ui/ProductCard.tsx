@@ -13,7 +13,15 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, action }: ProductCardProps) {
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 },
+      }}
+    >
       <CardActionArea component={RouterLink} to={`/product/${product.id}`} sx={{ flexGrow: 1 }}>
         <ProductImage product={product} height={140} fontSize={64} />
         <CardContent>

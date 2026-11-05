@@ -9,6 +9,7 @@ export default function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
     <Alert
       severity="error"
+      className="fade-in-up"
       action={
         <Button color="inherit" size="small" onClick={onRetry}>
           Повторить

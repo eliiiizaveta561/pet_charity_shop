@@ -13,8 +13,16 @@ interface ProductGridProps {
 export default function ProductGrid({ products, md = 4, renderAction }: ProductGridProps) {
   return (
     <Grid container spacing={3}>
-      {products.map((product) => (
-        <Grid item xs={12} sm={6} md={md} key={product.id}>
+      {products.map((product, index) => (
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={md}
+          key={product.id}
+          className="fade-in-up"
+          style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
+        >
           <ProductCard product={product} action={renderAction?.(product)} />
         </Grid>
       ))}

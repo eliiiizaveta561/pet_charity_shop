@@ -9,7 +9,7 @@ interface EmptyStateProps {
 
 export default function EmptyState({ title, text, action }: EmptyStateProps) {
   return (
-    <Box sx={{ py: 6, textAlign: 'center' }}>
+    <Box className="fade-in-up" sx={{ py: 6, textAlign: 'center' }}>
       <Typography variant="h6">{title}</Typography>
       <Typography color="text.secondary" sx={{ mb: action ? 2 : 0 }}>
         {text}

@@ -24,3 +24,69 @@ body {
 .leaflet-container {
   font-family: inherit;
 }
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop {
+  50% {
+    transform: scale(1.3);
+  }
+}
+
+@keyframes marker-select {
+  from {
+    transform: scale(1);
+  }
+  60% {
+    transform: scale(1.45);
+  }
+  to {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes field-error {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.3s ease-out both;
+}
+
+.pop {
+  animation: pop 0.3s ease-out;
+}
+
+.paw-marker--active {
+  animation: marker-select 0.35s ease-out;
+}
+
+.MuiFormHelperText-root.Mui-error {
+  animation: field-error 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

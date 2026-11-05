@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Alert, Button, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Alert, Button, Divider, Grid, Paper, Stack, Typography, Zoom } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline';
 import { OrderTotals, useCart } from '@/entities/cart';
 import { createOrder, CustomerData, Order } from '@/entities/order';
@@ -26,8 +26,10 @@ export default function CheckoutPage() {
 
   if (order) {
     return (
-      <Stack spacing={2} alignItems="flex-start" sx={{ maxWidth: 560 }}>
-        <CheckCircleIcon color="primary" sx={{ fontSize: 56 }} />
+      <Stack className="fade-in-up" spacing={2} alignItems="flex-start" sx={{ maxWidth: 560 }}>
+        <Zoom in style={{ transitionDelay: '150ms' }}>
+          <CheckCircleIcon color="primary" sx={{ fontSize: 56 }} />
+        </Zoom>
         <Typography variant="h2">Заказ №{order.number} оформлен</Typography>
         <Typography>Сумма заказа: {formatPrice(order.total)}.</Typography>
         {order.charityName && (

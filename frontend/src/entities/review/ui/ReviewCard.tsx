@@ -7,7 +7,7 @@ interface ReviewCardProps {
 
 export default function ReviewCard({ review }: ReviewCardProps) {
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper className="fade-in-up" sx={{ p: 2 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
         <Typography sx={{ fontWeight: 700 }}>{review.author}</Typography>
         <Rating value={review.rating} readOnly size="small" />

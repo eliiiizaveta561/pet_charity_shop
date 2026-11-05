@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Alert, Box, Button, Grid, Stack, Typography } from '@mui/material';
+import { Alert, Box, Button, Collapse, Grid, Stack, Typography } from '@mui/material';
 import { useCart } from '@/entities/cart';
 import { Charity, CharityCard, CharityMap } from '@/entities/charity';
 import SearchField from '@/shared/ui/SearchField';
@@ -12,6 +12,9 @@ interface CharityPickerProps {
 export default function CharityPicker({ charities }: CharityPickerProps) {
   const { charity: selected, setCharity, count } = useCart();
   const [query, setQuery] = useState('');
+  // Пока сообщение сворачивается после снятия выбора, в нём остаётся прежнее название.
+  const shown = useRef(selected);
+  if (selected) shown.current = selected;
 
   const visible = useMemo(() => {
     const text = query.trim().toLowerCase();
@@ -21,7 +24,7 @@ export default function CharityPicker({ charities }: CharityPickerProps) {
 
   return (
     <Stack spacing={3}>
-      {selected && (
+      <Collapse in={Boolean(selected)} unmountOnExit>
         <Alert
           severity="success"
           action={
@@ -35,9 +38,9 @@ export default function CharityPicker({ charities }: CharityPickerProps) {
             </>
           }
         >
-          Выбрано: {selected.name}, {selected.city}
+          Выбрано: {shown.current?.name}, {shown.current?.city}
         </Alert>
-      )}
+      </Collapse>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={5} sx={{ order: { xs: 2, md: 1 } }}>

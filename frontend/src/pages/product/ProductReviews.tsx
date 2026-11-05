@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Paper, Skeleton, Stack, Typography } from '@mui/material';
+import { Box, Button, Collapse, Paper, Skeleton, Stack, Typography } from '@mui/material';
 import { createReview, fetchReviews, NewReview, ReviewCard } from '@/entities/review';
 import AddReviewForm from '@/features/add-review/AddReviewForm';
 import { useAsyncData } from '@/shared/lib/useAsyncData';
@@ -27,18 +27,16 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     <Box component="section">
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="h3">Отзывы</Typography>
-        {!formOpen && (
-          <Button variant="outlined" onClick={() => setFormOpen(true)}>
-            Написать отзыв
-          </Button>
-        )}
+        <Button variant="outlined" onClick={() => setFormOpen((open) => !open)}>
+          {formOpen ? 'Скрыть форму' : 'Написать отзыв'}
+        </Button>
       </Stack>
 
-      {formOpen && (
+      <Collapse in={formOpen} unmountOnExit>
         <Paper sx={{ p: 3, mb: 2 }}>
           <AddReviewForm productId={productId} onSubmit={handleSubmit} onCancel={() => setFormOpen(false)} />
         </Paper>
-      )}
+      </Collapse>
 
       <AsyncContent
         state={state}

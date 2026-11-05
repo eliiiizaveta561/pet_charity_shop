@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Alert, Box, Button, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Alert, Box, Button, Collapse, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import PlaceIcon from '@mui/icons-material/PlaceOutlined';
 import { useCart } from '@/entities/cart';
@@ -104,11 +104,11 @@ export default function DonationPanel({ onValidityChange }: DonationPanelProps) 
         inputProps={{ inputMode: 'numeric' }}
       />
 
-      {donation > 0 && !charity && (
+      <Collapse in={donation > 0 && !charity} unmountOnExit>
         <Alert severity="warning" sx={{ mt: 2 }}>
           Выберите организацию на карте или уберите сумму пожертвования.
         </Alert>
-      )}
+      </Collapse>
     </Box>
   );
 }

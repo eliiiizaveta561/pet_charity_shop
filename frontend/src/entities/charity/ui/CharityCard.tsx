@@ -1,4 +1,4 @@
-import { Card, CardActionArea, CardContent, Stack, Typography } from '@mui/material';
+import { Card, CardActionArea, CardContent, Stack, Typography, Zoom } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Charity } from '../model/types';
 
@@ -10,14 +10,23 @@ interface CharityCardProps {
 
 export default function CharityCard({ charity, active, onSelect }: CharityCardProps) {
   return (
-    <Card sx={{ borderColor: active ? 'primary.main' : 'divider', borderWidth: active ? 2 : 1 }}>
+    <Card
+      className="fade-in-up"
+      sx={{
+        borderColor: active ? 'primary.main' : 'divider',
+        borderWidth: active ? 2 : 1,
+        transition: 'border-color 0.2s',
+      }}
+    >
       <CardActionArea onClick={() => onSelect(charity)}>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
               {charity.name}
             </Typography>
-            {active && <CheckCircleIcon color="primary" />}
+            <Zoom in={active} unmountOnExit>
+              <CheckCircleIcon color="primary" />
+            </Zoom>
           </Stack>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {charity.city}, {charity.address}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, ButtonProps } from '@mui/material';
+import { Button, ButtonProps, Zoom } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useCart } from '@/entities/cart';
 import type { Product } from '@/entities/product';
@@ -32,7 +32,13 @@ export default function AddToCartButton({ product, qty = 1, size = 'small', labe
       variant="contained"
       size={size}
       color={added ? 'secondary' : 'primary'}
-      startIcon={added ? <CheckIcon /> : undefined}
+      startIcon={
+        added ? (
+          <Zoom in>
+            <CheckIcon />
+          </Zoom>
+        ) : undefined
+      }
       onClick={handleAdd}
     >
       {added ? 'Добавлено' : label}

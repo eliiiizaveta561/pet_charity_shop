@@ -29,11 +29,9 @@ export default function CartPage() {
       <Typography variant="h2">Корзина</Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} md={7}>
-          <Stack spacing={2}>
-            {items.map((item) => (
-              <CartItemRow key={item.product.id} item={item} />
-            ))}
-          </Stack>
+          {items.map((item) => (
+            <CartItemRow key={item.product.id} item={item} />
+          ))}
         </Grid>
 
         <Grid item xs={12} md={5}>

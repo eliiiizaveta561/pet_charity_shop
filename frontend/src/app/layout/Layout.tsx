@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link as RouterLink, NavLink, Outlet } from 'react-router-dom';
+import { Link as RouterLink, NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Badge,
@@ -28,6 +28,7 @@ const navItems = [
 
 export default function Layout() {
   const { count } = useCart();
+  const { pathname } = useLocation();
   const theme = useTheme();
   const compact = useMediaQuery(theme.breakpoints.down('md'));
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
@@ -66,7 +67,8 @@ export default function Layout() {
           {compact && <Box sx={{ flexGrow: 1 }} />}
 
           <IconButton component={RouterLink} to="/cart" color="inherit" aria-label="Корзина">
-            <Badge badgeContent={count} color="secondary">
+            {/* Смена key перезапускает анимацию при каждом изменении количества. */}
+            <Badge key={count} className={count > 0 ? 'pop' : undefined} badgeContent={count} color="secondary">
               <ShoppingCartIcon />
             </Badge>
           </IconButton>
@@ -95,7 +97,9 @@ export default function Layout() {
       </AppBar>
 
       <Container component="main" maxWidth="lg" sx={{ flexGrow: 1, py: { xs: 3, md: 5 } }}>
-        <Outlet />
+        <Box key={pathname} className="fade-in-up">
+          <Outlet />
+        </Box>
       </Container>
 
       {import.meta.env.DEV && <DemoModeSwitch />}
