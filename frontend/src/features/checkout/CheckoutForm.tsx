@@ -1,61 +1,64 @@
-import { FormEvent, useState } from 'react';
-import { Box, Button, Stack, TextField } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, Stack, TextField } from '@mui/material';
 import type { CustomerData } from '@/entities/order';
+import { useForm } from '@/shared/lib/useForm';
+import { FormRules, matches, minLength, required } from '@/shared/lib/validation';
 
-type Errors = Partial<Record<keyof CustomerData, string>>;
+const rules: FormRules<CustomerData> = {
+  name: [
+    required('Введите имя'),
+    minLength(2, 'Имя должно содержать не меньше 2 символов'),
+    matches(/^[A-Za-zА-Яа-яЁё\s'-]+$/, 'Имя может содержать только буквы, пробел и дефис'),
+  ],
+  phone: [
+    required('Введите телефон'),
+    matches(/^(\+7|7|8)[\s()-]*(\d[\s()-]*){10}$/, 'Введите телефон в формате +7 900 123-45-67'),
+  ],
+  address: [required('Введите адрес доставки'), minLength(5, 'Укажите город, улицу и дом')],
+};
 
 interface CheckoutFormProps {
-  onSubmit: (customer: CustomerData) => void;
+  disabled?: boolean;
+  onSubmit: (customer: CustomerData) => void | Promise<void>;
 }
 
-export default function CheckoutForm({ onSubmit }: CheckoutFormProps) {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [errors, setErrors] = useState<Errors>({});
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    const next: Errors = {};
-    if (name.trim().length < 2) next.name = 'Введите имя';
-    if (!/^[+\d][\d\s()-]{9,}$/.test(phone.trim())) next.phone = 'Введите телефон, например +7 900 123-45-67';
-    if (address.trim().length < 5) next.address = 'Введите адрес доставки';
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
-    onSubmit({ name, phone, address });
-  };
+export default function CheckoutForm({ disabled = false, onSubmit }: CheckoutFormProps) {
+  const form = useForm<CustomerData>({
+    initialValues: { name: '', phone: '', address: '' },
+    rules,
+    onSubmit,
+  });
 
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate>
+    <Box component="form" onSubmit={form.handleSubmit} noValidate>
       <Stack spacing={2}>
-        <TextField
-          label="Имя"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          error={Boolean(errors.name)}
-          helperText={errors.name}
-          fullWidth
-        />
+        <TextField label="Имя" autoComplete="name" required fullWidth {...form.field('name')} />
         <TextField
           label="Телефон"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          error={Boolean(errors.phone)}
-          helperText={errors.phone}
+          type="tel"
+          autoComplete="tel"
+          placeholder="+7 900 123-45-67"
+          required
           fullWidth
+          {...form.field('phone')}
         />
         <TextField
           label="Адрес доставки"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          error={Boolean(errors.address)}
-          helperText={errors.address}
+          autoComplete="street-address"
+          required
           multiline
           minRows={2}
           fullWidth
+          {...form.field('address')}
         />
-        <Button type="submit" variant="contained" size="large">
-          Подтвердить заказ
+        {form.submitError && <Alert severity="error">{form.submitError}</Alert>}
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={disabled || form.submitting}
+          startIcon={form.submitting ? <CircularProgress size={18} color="inherit" /> : undefined}
+        >
+          {form.submitting ? 'Отправляем заказ…' : 'Подтвердить заказ'}
         </Button>
       </Stack>
     </Box>

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { OrderTotals, useCart } from '@/entities/cart';
@@ -8,6 +9,7 @@ import MessageScreen from '@/shared/ui/MessageScreen';
 export default function CartPage() {
   const { items, itemsTotal, donation, total, charity } = useCart();
   const navigate = useNavigate();
+  const [amountValid, setAmountValid] = useState(true);
 
   if (items.length === 0) {
     return (
@@ -36,7 +38,7 @@ export default function CartPage() {
 
         <Grid item xs={12} md={5}>
           <Paper sx={{ p: 3 }}>
-            <DonationPanel />
+            <DonationPanel onValidityChange={setAmountValid} />
             <Divider sx={{ my: 2 }} />
             <OrderTotals itemsTotal={itemsTotal} donation={donation} total={total} />
             <Button
@@ -44,7 +46,7 @@ export default function CartPage() {
               size="large"
               variant="contained"
               sx={{ mt: 2 }}
-              disabled={donationInvalid}
+              disabled={donationInvalid || !amountValid}
               onClick={() => navigate('/checkout')}
             >
               Оформить заказ
