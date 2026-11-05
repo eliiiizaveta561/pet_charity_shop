@@ -1,7 +1,10 @@
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Button, Card, CardContent, Grid, Stack, Typography } from '@mui/material';
-import { ProductCard, products } from '@/entities/product';
+import { fetchProducts, ProductGrid, ProductGridSkeleton } from '@/entities/product';
 import AddToCartButton from '@/features/add-to-cart/AddToCartButton';
+import { useAsyncData } from '@/shared/lib/useAsyncData';
+import AsyncContent from '@/shared/ui/AsyncContent';
+import EmptyState from '@/shared/ui/EmptyState';
 
 const steps = [
   { title: 'Выберите товары', text: 'Корм, лежанки и аксессуары для вашего питомца.' },
@@ -10,6 +13,8 @@ const steps = [
 ];
 
 export default function HomePage() {
+  const { state, reload } = useAsyncData(fetchProducts, []);
+
   return (
     <Stack spacing={7}>
       <Box
@@ -79,13 +84,21 @@ export default function HomePage() {
             Весь каталог
           </Button>
         </Stack>
-        <Grid container spacing={3}>
-          {products.slice(0, 4).map((product) => (
-            <Grid item xs={12} sm={6} md={3} key={product.id}>
-              <ProductCard product={product} action={<AddToCartButton product={product} />} />
-            </Grid>
-          ))}
-        </Grid>
+        <AsyncContent
+          state={state}
+          onRetry={reload}
+          loading={<ProductGridSkeleton count={4} md={3} />}
+          isEmpty={(products) => products.length === 0}
+          empty={<EmptyState title="Товары скоро появятся" text="Мы готовим витрину, загляните немного позже." />}
+        >
+          {(products) => (
+            <ProductGrid
+              products={products.slice(0, 4)}
+              md={3}
+              renderAction={(product) => <AddToCartButton product={product} />}
+            />
+          )}
+        </AsyncContent>
       </Box>
     </Stack>
   );

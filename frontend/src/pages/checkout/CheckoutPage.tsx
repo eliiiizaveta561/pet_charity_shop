@@ -3,7 +3,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { Alert, Button, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline';
 import { OrderTotals, useCart } from '@/entities/cart';
-import type { Order } from '@/entities/order';
+import { createOrder, CustomerData, Order } from '@/entities/order';
 import CheckoutForm from '@/features/checkout/CheckoutForm';
 import { formatPrice } from '@/shared/lib/format';
 import MessageScreen from '@/shared/ui/MessageScreen';
@@ -13,13 +13,14 @@ export default function CheckoutPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const donationInvalid = donation > 0 && charity === null;
 
-  const handleSubmit = () => {
-    setOrder({
-      number: Math.floor(1000 + Math.random() * 9000),
+  const handleSubmit = async (customer: CustomerData) => {
+    const created = await createOrder({
+      customer,
       total,
       donation,
       charityName: donation > 0 && charity ? charity.name : null,
     });
+    setOrder(created);
     clear();
   };
 

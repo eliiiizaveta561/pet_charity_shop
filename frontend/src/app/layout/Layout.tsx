@@ -18,6 +18,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCartOutlined';
 import PetsIcon from '@mui/icons-material/Pets';
 import { useCart } from '@/entities/cart';
+import DemoModeSwitch from './DemoModeSwitch';
 
 const navItems = [
   { to: '/', label: 'Главная', end: true },
@@ -96,6 +97,8 @@ export default function Layout() {
       <Container component="main" maxWidth="lg" sx={{ flexGrow: 1, py: { xs: 3, md: 5 } }}>
         <Outlet />
       </Container>
+
+      {import.meta.env.DEV && <DemoModeSwitch />}
     </Box>
   );
 }

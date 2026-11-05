@@ -10,3 +10,5 @@ export interface Order {
   donation: number;
   charityName: string | null;
 }
+
+export type OrderDraft = Omit<Order, 'number'> & { customer: CustomerData };

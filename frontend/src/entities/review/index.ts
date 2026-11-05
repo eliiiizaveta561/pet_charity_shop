@@ -1,3 +1,3 @@
 export type { NewReview, Review } from './model/types';
-export { reviews } from './api/reviews.data';
+export { createReview, fetchReviews } from './api/reviewApi';
 export { default as ReviewCard } from './ui/ReviewCard';

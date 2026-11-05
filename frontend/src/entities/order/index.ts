@@ -1,1 +1,2 @@
-export type { CustomerData, Order } from './model/types';
+export type { CustomerData, Order, OrderDraft } from './model/types';
+export { createOrder } from './api/orderApi';
