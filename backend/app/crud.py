@@ -166,12 +166,16 @@ def get_donation_summary(db: Session, charity_id: int) -> schemas.DonationSummar
 def order_query():
     return select(models.Order).options(
         selectinload(models.Order.items).selectinload(models.OrderItem.product),
-        selectinload(models.Order.donation),
+        selectinload(models.Order.donation).selectinload(models.Donation.charity),
     )
 
 
-def get_orders(db: Session) -> Sequence[models.Order]:
-    return db.scalars(order_query().order_by(models.Order.id.desc())).all()
+def get_orders(db: Session, user_id: Optional[int] = None) -> Sequence[models.Order]:
+    """Без user_id возвращает все заказы (для администратора), иначе только заказы пользователя."""
+    query = order_query()
+    if user_id is not None:
+        query = query.where(models.Order.user_id == user_id)
+    return db.scalars(query.order_by(models.Order.id.desc())).all()
 
 
 def get_order(db: Session, order_id: int) -> Optional[models.Order]:
@@ -188,4 +192,46 @@ def update_order(db: Session, order: models.Order, data: schemas.OrderUpdate) ->
 
 def delete_order(db: Session, order: models.Order) -> None:
     db.delete(order)
+    db.commit()
+
+
+def review_query():
+    return select(models.Review).options(joinedload(models.Review.user))
+
+
+def get_reviews(db: Session, product_id: int) -> Sequence[models.Review]:
+    query = review_query().where(models.Review.product_id == product_id).order_by(models.Review.id.desc())
+    return db.scalars(query).all()
+
+
+def get_review(db: Session, review_id: int) -> Optional[models.Review]:
+    query = review_query().where(models.Review.id == review_id).execution_options(populate_existing=True)
+    return db.scalar(query)
+
+
+def create_review(
+    db: Session, product_id: int, user_id: int, data: schemas.ReviewCreate
+) -> models.Review:
+    existing = db.scalar(
+        select(models.Review.id).where(
+            models.Review.product_id == product_id, models.Review.user_id == user_id
+        )
+    )
+    if existing is not None:
+        raise AppError(409, "Вы уже оставили отзыв на этот товар, его можно изменить")
+    review = models.Review(product_id=product_id, user_id=user_id, rating=data.rating, text=data.text.strip())
+    db.add(review)
+    db.commit()
+    return require(get_review(db, review.id), "Отзыв не найден")
+
+
+def update_review(db: Session, review: models.Review, data: schemas.ReviewUpdate) -> models.Review:
+    for key, value in changes(data).items():
+        setattr(review, key, value.strip() if isinstance(value, str) else value)
+    db.commit()
+    return require(get_review(db, review.id), "Отзыв не найден")
+
+
+def delete_review(db: Session, review: models.Review) -> None:
+    db.delete(review)
     db.commit()

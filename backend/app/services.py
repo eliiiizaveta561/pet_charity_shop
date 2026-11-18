@@ -2,10 +2,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
+from .auth import is_admin
 from .errors import AppError, require
 
 
-def create_order(db: Session, data: schemas.OrderCreate) -> models.Order:
+def create_order(db: Session, data: schemas.OrderCreate, user: models.User) -> models.Order:
     quantities: dict[int, int] = {}
     for item in data.items:
         quantities[item.product_id] = quantities.get(item.product_id, 0) + item.quantity
@@ -18,6 +19,7 @@ def create_order(db: Session, data: schemas.OrderCreate) -> models.Order:
         raise AppError(404, f"Товары не найдены: {ids}")
 
     order = models.Order(
+        user_id=user.id,
         customer_name=data.customer_name,
         phone=data.phone,
         address=data.address,
@@ -41,3 +43,33 @@ def create_order(db: Session, data: schemas.OrderCreate) -> models.Order:
     db.add(order)
     db.commit()
     return require(crud.get_order(db, order.id), "Заказ не найден")
+
+
+def check_order_access(order: models.Order, user: models.User) -> None:
+    if not is_admin(user) and order.user_id != user.id:
+        raise AppError(403, "Нет доступа к чужому заказу")
+
+
+def update_order(
+    db: Session, order: models.Order, data: schemas.OrderUpdate, user: models.User
+) -> models.Order:
+    check_order_access(order, user)
+    # Покупатель может поправить контакты или отменить заказ, пока его не начали обрабатывать.
+    # Остальные смены статуса делает администратор.
+    if not is_admin(user):
+        if order.status != "new":
+            raise AppError(403, "Заказ уже в обработке, изменить его может только администратор")
+        if data.status is not None and data.status != "cancelled":
+            raise AppError(403, "Покупатель может только отменить заказ")
+    return crud.update_order(db, order, data)
+
+
+def check_review_author(review: models.Review, user: models.User) -> None:
+    if review.user_id != user.id:
+        raise AppError(403, "Изменять отзыв может только его автор")
+
+
+def check_review_delete(review: models.Review, user: models.User) -> None:
+    # Удалить отзыв может автор или администратор (модерация)
+    if review.user_id != user.id and not is_admin(user):
+        raise AppError(403, "Удалить отзыв может только автор или администратор")

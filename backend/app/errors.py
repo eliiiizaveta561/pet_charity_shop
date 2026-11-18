@@ -9,9 +9,10 @@ T = TypeVar("T")
 
 
 class AppError(Exception):
-    def __init__(self, status_code: int, detail: str) -> None:
+    def __init__(self, status_code: int, detail: str, headers: Optional[dict[str, str]] = None) -> None:
         self.status_code = status_code
         self.detail = detail
+        self.headers = headers
 
 
 def require(obj: Optional[T], message: str) -> T:
@@ -49,7 +50,7 @@ def translate(error: dict) -> str:
 
 
 async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail}, headers=exc.headers)
 
 
 async def validation_error_handler(

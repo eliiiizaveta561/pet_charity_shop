@@ -2,6 +2,7 @@ from sqlalchemy import select
 
 from . import models
 from .database import SessionLocal
+from .security import hash_password
 
 CATEGORIES = ["Собаки", "Кошки", "Птицы", "Грызуны", "Рыбки"]
 
@@ -27,6 +28,20 @@ CHARITIES = [
     ("Приют «Ушастик»", "Екатеринбург", "ул. Мира, 40", "Принимает собак и кошек, есть отдельный вольер для щенков и котят.", "Одеяла и лежанки", 56.8389, 60.6057),
 ]
 
+# Учётные записи для демонстрации. Пароли хранятся в БД только в виде хеша.
+USERS = [
+    ("admin@dobromarket.ru", "Администратор", "admin12345", "admin"),
+    ("anna@example.ru", "Анна", "anna12345", "customer"),
+    ("igor@example.ru", "Игорь", "igor12345", "customer"),
+]
+
+REVIEWS = [
+    ("anna@example.ru", "Сухой корм для взрослых собак", 5, "Собака ест с удовольствием, упаковки хватает надолго."),
+    ("igor@example.ru", "Сухой корм для взрослых собак", 4, "Хороший состав, но гранулы крупноваты для небольшой собаки."),
+    ("anna@example.ru", "Влажный корм для кошек, набор 12 шт.", 5, "Кошка съедает всё и просит добавки."),
+    ("igor@example.ru", "Когтеточка-столбик", 3, "Столбик устойчивый, но кот не сразу к нему привык."),
+]
+
 
 def main() -> None:
     with SessionLocal() as db:
@@ -34,20 +49,29 @@ def main() -> None:
             print("В базе уже есть данные, заполнение пропущено")
             return
 
+        users = {
+            email: models.User(email=email, name=name, password_hash=hash_password(password), role=role)
+            for email, name, password, role in USERS
+        }
+        db.add_all(users.values())
+
         by_name = {name: models.Category(name=name) for name in CATEGORIES}
         db.add_all(by_name.values())
 
+        products = {}
         for name, brand, category, price, description, emoji in PRODUCTS:
-            db.add(
-                models.Product(
-                    name=name,
-                    brand=brand,
-                    category=by_name[category],
-                    price=price,
-                    description=description,
-                    emoji=emoji,
-                )
+            products[name] = models.Product(
+                name=name,
+                brand=brand,
+                category=by_name[category],
+                price=price,
+                description=description,
+                emoji=emoji,
             )
+        db.add_all(products.values())
+
+        for email, product_name, rating, text in REVIEWS:
+            db.add(models.Review(user=users[email], product=products[product_name], rating=rating, text=text))
 
         for name, city, address, description, need, lat, lng in CHARITIES:
             db.add(
@@ -63,7 +87,10 @@ def main() -> None:
             )
 
         db.commit()
-        print("Добавлено: категорий", len(CATEGORIES), ", товаров", len(PRODUCTS), ", организаций", len(CHARITIES))
+        print(
+            f"Добавлено: пользователей {len(USERS)}, категорий {len(CATEGORIES)}, "
+            f"товаров {len(PRODUCTS)}, организаций {len(CHARITIES)}, отзывов {len(REVIEWS)}"
+        )
 
 
 if __name__ == "__main__":

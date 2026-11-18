@@ -5,6 +5,9 @@ from typing import Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 OrderStatus = Literal["new", "paid", "shipped", "cancelled"]
+Role = Literal["customer", "admin"]
+
+EMAIL_PATTERN = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
 
 
 def normalize_phone(value: str) -> str:
@@ -19,6 +22,55 @@ def normalize_phone(value: str) -> str:
 
 class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+
+def normalize_email(value: str) -> str:
+    email = value.strip().lower()
+    if not EMAIL_PATTERN.fullmatch(email):
+        raise ValueError("Введите адрес почты в формате name@example.ru")
+    return email
+
+
+class RegisterRequest(BaseModel):
+    email: str = Field(max_length=254)
+    name: str = Field(min_length=2, max_length=100)
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, value: str) -> str:
+        return normalize_email(value)
+
+    @field_validator("password")
+    @classmethod
+    def check_password(cls, value: str) -> str:
+        if not re.search(r"[A-Za-zА-Яа-яЁё]", value) or not re.search(r"\d", value):
+            raise ValueError("Пароль должен содержать хотя бы одну букву и одну цифру")
+        return value
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(max_length=254)
+    password: str = Field(min_length=1, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def lower_email(cls, value: str) -> str:
+        return value.strip().lower()
+
+
+class UserRead(ORMModel):
+    id: int
+    email: str
+    name: str
+    role: Role
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    user: UserRead
 
 
 class CategoryCreate(BaseModel):
@@ -145,11 +197,13 @@ class OrderItemRead(ORMModel):
 class DonationRead(ORMModel):
     id: int
     charity_id: int
+    charity_name: str
     amount: int
 
 
 class OrderRead(ORMModel):
     id: int
+    user_id: int
     customer_name: str
     phone: str
     address: str
@@ -160,3 +214,23 @@ class OrderRead(ORMModel):
     items_total: int
     donation_total: int
     total: int
+
+
+class ReviewCreate(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    text: str = Field(min_length=10, max_length=500)
+
+
+class ReviewUpdate(BaseModel):
+    rating: Optional[int] = Field(default=None, ge=1, le=5)
+    text: Optional[str] = Field(default=None, min_length=10, max_length=500)
+
+
+class ReviewRead(ORMModel):
+    id: int
+    product_id: int
+    user_id: int
+    author: str
+    rating: int
+    text: str
+    created_at: datetime
