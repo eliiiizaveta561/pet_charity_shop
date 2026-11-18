@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
 import { OrderTotals, useCart } from '@/entities/cart';
+import { useSession } from '@/entities/session';
 import DonationPanel from '@/features/donate/DonationPanel';
 import CartItemRow from '@/features/edit-cart/CartItemRow';
 import MessageScreen from '@/shared/ui/MessageScreen';
 
 export default function CartPage() {
   const { items, itemsTotal, donation, total, charity } = useCart();
+  const { status } = useSession();
   const navigate = useNavigate();
   const [amountValid, setAmountValid] = useState(true);
 
@@ -49,6 +51,11 @@ export default function CartPage() {
             >
               Оформить заказ
             </Button>
+            {status === 'guest' && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+                Для оформления нужно войти или зарегистрироваться. Корзина сохранится.
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>

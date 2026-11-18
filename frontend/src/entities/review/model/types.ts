@@ -1,9 +1,15 @@
 export interface Review {
   id: number;
   productId: number;
+  userId: number;
   author: string;
   rating: number;
   text: string;
+  createdAt: string;
 }
 
-export type NewReview = Omit<Review, 'id'>;
+/** Автора не передаём: сервер берёт его из токена. */
+export interface ReviewInput {
+  rating: number;
+  text: string;
+}

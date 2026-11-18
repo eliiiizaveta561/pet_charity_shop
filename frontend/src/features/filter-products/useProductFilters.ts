@@ -1,20 +1,27 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { categories, Category, Product } from '@/entities/product';
+import type { Category, Product } from '@/entities/product';
 
-export type CategoryFilter = Category | 'all';
+/** 'all' или id категории строкой - в таком виде значение лежит в адресе. */
+export type CategoryFilter = string;
 export type Sort = 'default' | 'asc' | 'desc';
 
-const isCategory = (value: string | null): value is Category => categories.includes(value as Category);
 const isSort = (value: string | null): value is Sort => value === 'asc' || value === 'desc';
+
+/** Категории, в которых есть товары. Отдельный запрос за ними не нужен. */
+function collectCategories(products: Product[]): Category[] {
+  const byId = new Map(products.map((p) => [p.category.id, p.category]));
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+}
 
 /** Значения фильтров хранятся в адресе: они переживают переход на товар и возврат назад. */
 export function useProductFilters(products: Product[]) {
   const [params, setParams] = useSearchParams();
+  const categories = useMemo(() => collectCategories(products), [products]);
 
   const query = params.get('q') ?? '';
   const rawCategory = params.get('category');
-  const category: CategoryFilter = isCategory(rawCategory) ? rawCategory : 'all';
+  const category: CategoryFilter = categories.some((c) => String(c.id) === rawCategory) ? rawCategory! : 'all';
   const rawSort = params.get('sort');
   const sort: Sort = isSort(rawSort) ? rawSort : 'default';
 
@@ -33,7 +40,7 @@ export function useProductFilters(products: Product[]) {
     const text = query.trim().toLowerCase();
     const list = products.filter(
       (p) =>
-        (category === 'all' || p.category === category) &&
+        (category === 'all' || String(p.category.id) === category) &&
         (text === '' || p.name.toLowerCase().includes(text) || p.brand.toLowerCase().includes(text)),
     );
     if (sort === 'asc') return [...list].sort((a, b) => a.price - b.price);
@@ -42,6 +49,7 @@ export function useProductFilters(products: Product[]) {
   }, [products, query, category, sort]);
 
   return {
+    categories,
     query,
     setQuery: (value: string) => setParam('q', value, ''),
     category,

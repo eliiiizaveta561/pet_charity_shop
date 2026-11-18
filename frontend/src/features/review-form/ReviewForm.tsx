@@ -1,16 +1,14 @@
 import { Alert, Box, Button, CircularProgress, FormHelperText, Rating, Stack, TextField, Typography } from '@mui/material';
-import type { NewReview } from '@/entities/review';
+import type { ReviewInput } from '@/entities/review';
 import { useForm } from '@/shared/lib/useForm';
 import { FormRules, maxLength, minLength, required } from '@/shared/lib/validation';
 
 interface ReviewValues {
-  author: string;
   rating: string;
   text: string;
 }
 
 const rules: FormRules<ReviewValues> = {
-  author: [required('Введите имя'), minLength(2, 'Имя должно содержать не меньше 2 символов')],
   rating: [required('Поставьте оценку')],
   text: [
     required('Напишите отзыв'),
@@ -19,25 +17,26 @@ const rules: FormRules<ReviewValues> = {
   ],
 };
 
-interface AddReviewFormProps {
-  productId: number;
-  onSubmit: (review: NewReview) => void | Promise<void>;
+interface ReviewFormProps {
+  /** Для редактирования: текущая оценка и текст. */
+  initial?: ReviewInput;
+  submitLabel: string;
+  onSubmit: (review: ReviewInput) => Promise<void>;
   onCancel: () => void;
 }
 
-export default function AddReviewForm({ productId, onSubmit, onCancel }: AddReviewFormProps) {
+/** Форма отзыва для создания и редактирования. Имя автора берётся из аккаунта. */
+export default function ReviewForm({ initial, submitLabel, onSubmit, onCancel }: ReviewFormProps) {
   const form = useForm<ReviewValues>({
-    initialValues: { author: '', rating: '', text: '' },
+    initialValues: { rating: initial ? String(initial.rating) : '', text: initial?.text ?? '' },
     rules,
-    onSubmit: ({ author, rating, text }) =>
-      onSubmit({ productId, author: author.trim(), rating: Number(rating), text: text.trim() }),
+    onSubmit: ({ rating, text }) => onSubmit({ rating: Number(rating), text: text.trim() }),
   });
   const ratingError = form.errorOf('rating');
 
   return (
     <Box component="form" onSubmit={form.handleSubmit} noValidate>
       <Stack spacing={2}>
-        <TextField label="Ваше имя" required fullWidth {...form.field('author')} />
         <Box>
           <Typography component="legend" variant="body2" sx={{ mb: 0.5 }}>
             Оценка
@@ -58,7 +57,7 @@ export default function AddReviewForm({ productId, onSubmit, onCancel }: AddRevi
             disabled={form.submitting}
             startIcon={form.submitting ? <CircularProgress size={18} color="inherit" /> : undefined}
           >
-            Отправить
+            {submitLabel}
           </Button>
           <Button onClick={onCancel}>Отмена</Button>
         </Stack>

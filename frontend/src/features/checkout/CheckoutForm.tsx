@@ -17,15 +17,19 @@ const rules: FormRules<CustomerData> = {
 };
 
 interface CheckoutFormProps {
+  /** Имя из аккаунта, чтобы не вводить его заново. */
+  initialName?: string;
   disabled?: boolean;
   onSubmit: (customer: CustomerData) => void | Promise<void>;
 }
 
-export default function CheckoutForm({ disabled = false, onSubmit }: CheckoutFormProps) {
+export default function CheckoutForm({ initialName = '', disabled = false, onSubmit }: CheckoutFormProps) {
   const form = useForm<CustomerData>({
-    initialValues: { name: '', phone: '', address: '' },
+    initialValues: { name: initialName, phone: '', address: '' },
     rules,
     onSubmit,
+    // В API имя покупателя называется customer_name
+    serverFields: { customer_name: 'name' },
   });
 
   return (

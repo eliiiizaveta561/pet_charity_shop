@@ -4,11 +4,13 @@ import { Alert, Button, Divider, Grid, Paper, Stack, Typography, Zoom } from '@m
 import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline';
 import { OrderTotals, useCart } from '@/entities/cart';
 import { createOrder, CustomerData, Order } from '@/entities/order';
+import { useSession } from '@/entities/session';
 import CheckoutForm from '@/features/checkout/CheckoutForm';
 import { formatPrice } from '@/shared/lib/format';
 import MessageScreen from '@/shared/ui/MessageScreen';
 
 export default function CheckoutPage() {
+  const { user } = useSession();
   const { items, itemsTotal, donation, total, charity, clear } = useCart();
   const [order, setOrder] = useState<Order | null>(null);
   const donationInvalid = donation > 0 && charity === null;
@@ -16,30 +18,35 @@ export default function CheckoutPage() {
   const handleSubmit = async (customer: CustomerData) => {
     const created = await createOrder({
       customer,
-      total,
-      donation,
-      charityName: donation > 0 && charity ? charity.name : null,
+      items: items.map((item) => ({ productId: item.product.id, quantity: item.qty })),
+      donation: donation > 0 && charity ? { charityId: charity.id, amount: donation } : null,
     });
     setOrder(created);
     clear();
   };
 
   if (order) {
+    // Показываем то, что вернул сервер: цены и сумма посчитаны по данным из БД
     return (
       <Stack className="fade-in-up" spacing={2} alignItems="flex-start" sx={{ maxWidth: 560 }}>
         <Zoom in style={{ transitionDelay: '150ms' }}>
           <CheckCircleIcon color="primary" sx={{ fontSize: 56 }} />
         </Zoom>
-        <Typography variant="h2">Заказ №{order.number} оформлен</Typography>
+        <Typography variant="h2">Заказ №{order.id} оформлен</Typography>
         <Typography>Сумма заказа: {formatPrice(order.total)}.</Typography>
-        {order.charityName && (
+        {order.donation && (
           <Typography>
-            Пожертвование {formatPrice(order.donation)} будет передано: {order.charityName}. Спасибо!
+            Пожертвование {formatPrice(order.donation.amount)} будет передано: {order.donation.charityName}. Спасибо!
           </Typography>
         )}
-        <Button component={RouterLink} to="/catalog" variant="contained">
-          Продолжить покупки
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button component={RouterLink} to="/orders" variant="contained">
+            Мои заказы
+          </Button>
+          <Button component={RouterLink} to="/catalog">
+            Продолжить покупки
+          </Button>
+        </Stack>
       </Stack>
     );
   }
@@ -74,7 +81,7 @@ export default function CheckoutPage() {
                 Для пожертвования не выбрана организация.
               </Alert>
             )}
-            <CheckoutForm disabled={donationInvalid} onSubmit={handleSubmit} />
+            <CheckoutForm initialName={user?.name} disabled={donationInvalid} onSubmit={handleSubmit} />
           </Paper>
         </Grid>
 

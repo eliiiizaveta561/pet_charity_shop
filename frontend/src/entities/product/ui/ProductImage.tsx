@@ -1,8 +1,8 @@
 import { Box, BoxProps } from '@mui/material';
-import { Product } from '../model/types';
+import { Product, productTint } from '../model/types';
 
 interface ProductImageProps {
-  product: Pick<Product, 'emoji' | 'tint'>;
+  product: Pick<Product, 'id' | 'emoji'>;
   width?: BoxProps['width'];
   height: BoxProps['height'];
   fontSize: BoxProps['fontSize'];
@@ -18,7 +18,7 @@ export default function ProductImage({ product, width, height, fontSize, borderR
         height,
         fontSize,
         borderRadius,
-        bgcolor: product.tint,
+        bgcolor: productTint(product.id),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

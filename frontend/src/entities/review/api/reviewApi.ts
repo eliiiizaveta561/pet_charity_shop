@@ -1,13 +1,37 @@
-import { demoRequest } from '@/shared/api/demo';
-import { NewReview, Review } from '../model/types';
-import { reviews } from './reviews.data';
+import { request } from '@/shared/api/http';
+import { Review, ReviewInput } from '../model/types';
 
-export const fetchReviews = (productId: number): Promise<Review[]> =>
-  demoRequest(() => reviews.filter((r) => r.productId === productId), []);
+interface ReviewResponse {
+  id: number;
+  product_id: number;
+  user_id: number;
+  author: string;
+  rating: number;
+  text: string;
+  created_at: string;
+}
 
-export const createReview = (review: NewReview): Promise<Review> =>
-  demoRequest(() => {
-    const created: Review = { ...review, id: Date.now() };
-    reviews.unshift(created);
-    return created;
-  });
+const toReview = (data: ReviewResponse): Review => ({
+  id: data.id,
+  productId: data.product_id,
+  userId: data.user_id,
+  author: data.author,
+  rating: data.rating,
+  text: data.text,
+  createdAt: data.created_at,
+});
+
+export async function fetchReviews(productId: number): Promise<Review[]> {
+  const reviews = await request<ReviewResponse[]>(`/products/${productId}/reviews`);
+  return reviews.map(toReview);
+}
+
+export async function createReview(productId: number, input: ReviewInput): Promise<Review> {
+  return toReview(await request<ReviewResponse>(`/products/${productId}/reviews`, { method: 'POST', body: input }));
+}
+
+export async function updateReview(id: number, input: ReviewInput): Promise<Review> {
+  return toReview(await request<ReviewResponse>(`/reviews/${id}`, { method: 'PATCH', body: input }));
+}
+
+export const deleteReview = (id: number): Promise<void> => request<void>(`/reviews/${id}`, { method: 'DELETE' });

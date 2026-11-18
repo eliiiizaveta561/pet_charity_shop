@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Card, CardActionArea, CardActions, CardContent, Chip, Typography } from '@mui/material';
 import { formatPrice } from '@/shared/lib/format';
-import { categoryLabels, Product } from '../model/types';
+import { Product } from '../model/types';
 import ProductImage from './ProductImage';
 
 interface ProductCardProps {
@@ -25,7 +25,7 @@ export default function ProductCard({ product, action }: ProductCardProps) {
       <CardActionArea component={RouterLink} to={`/product/${product.id}`} sx={{ flexGrow: 1 }}>
         <ProductImage product={product} height={140} fontSize={64} />
         <CardContent>
-          <Chip size="small" label={categoryLabels[product.category]} sx={{ mb: 1 }} />
+          <Chip size="small" label={product.category.name} sx={{ mb: 1 }} />
           <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
             {product.name}
           </Typography>

@@ -25,7 +25,8 @@ interface CartState {
 
 const CartContext = createContext<CartState | null>(null);
 
-const STORAGE_KEY = 'dobromarket-cart';
+// v2: товары теперь приходят из API (категория - объект), старые демо-корзины не подходят
+const STORAGE_KEY = 'dobromarket-cart-v2';
 
 type StoredCart = Pick<CartState, 'items' | 'charity' | 'donation'>;
 

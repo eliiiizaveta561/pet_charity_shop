@@ -18,7 +18,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCartOutlined';
 import PetsIcon from '@mui/icons-material/Pets';
 import { useCart } from '@/entities/cart';
-import DemoModeSwitch from './DemoModeSwitch';
+import UserMenu from '@/features/auth/UserMenu';
 
 const navItems = [
   { to: '/', label: 'Главная', end: true },
@@ -73,6 +73,8 @@ export default function Layout() {
             </Badge>
           </IconButton>
 
+          <UserMenu compact={compact} />
+
           {compact && (
             <>
               <IconButton color="inherit" aria-label="Открыть меню" onClick={(e) => setAnchor(e.currentTarget)}>
@@ -101,8 +103,6 @@ export default function Layout() {
           <Outlet />
         </Box>
       </Container>
-
-      {import.meta.env.DEV && <DemoModeSwitch />}
     </Box>
   );
 }

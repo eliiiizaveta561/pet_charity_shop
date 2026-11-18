@@ -1,5 +1,4 @@
 import { Box, FormControl, InputLabel, MenuItem, Select, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { categories, categoryLabels } from '@/entities/product';
 import SearchField from '@/shared/ui/SearchField';
 import { CategoryFilter, ProductFiltersState, Sort } from './useProductFilters';
 
@@ -8,7 +7,7 @@ interface ProductFiltersProps {
 }
 
 export default function ProductFilters({ filters }: ProductFiltersProps) {
-  const { query, setQuery, category, setCategory, sort, setSort } = filters;
+  const { categories, query, setQuery, category, setCategory, sort, setSort } = filters;
 
   return (
     <>
@@ -32,9 +31,9 @@ export default function ProductFilters({ filters }: ProductFiltersProps) {
           onChange={(_, value: CategoryFilter | null) => value && setCategory(value)}
         >
           <ToggleButton value="all">Все</ToggleButton>
-          {categories.map((key) => (
-            <ToggleButton key={key} value={key}>
-              {categoryLabels[key]}
+          {categories.map((item) => (
+            <ToggleButton key={item.id} value={String(item.id)}>
+              {item.name}
             </ToggleButton>
           ))}
         </ToggleButtonGroup>

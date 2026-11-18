@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { Box, Breadcrumbs, Button, Chip, Grid, Link, Paper, Stack, Typography } from '@mui/material';
-import { categoryLabels, Product, ProductImage } from '@/entities/product';
+import { Product, ProductImage } from '@/entities/product';
 import AddToCartButton from '@/features/add-to-cart/AddToCartButton';
 import { formatPrice } from '@/shared/lib/format';
 import { useNotify } from '@/shared/ui/notifications';
@@ -39,7 +39,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         <Grid item xs={12} md={6}>
           <Stack spacing={2}>
             <Box>
-              <Chip size="small" label={categoryLabels[product.category]} sx={{ mb: 1 }} />
+              <Chip size="small" label={product.category.name} sx={{ mb: 1 }} />
               <Typography variant="h2">{product.name}</Typography>
               <Typography color="text.secondary">Бренд: {product.brand}</Typography>
             </Box>
